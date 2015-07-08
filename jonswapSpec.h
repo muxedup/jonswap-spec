@@ -21,7 +21,7 @@ class jonswapSpec
 {
     friend ostream &operator<<(ostream &, const jonswapSpec &);
 public:
-	jonswapSpec (double alpha, double wp = 0.5711, double wmax = 3.0, double gamma = 3.3, double s1 = 0.7, double s2 = 0.9);
+	jonswapSpec (double alpha, double wp, double wmax, double gamma = 3.3, double s1 = 0.07, double s2 = 0.09);
 	jonswapSpec(double vel10, double F);
 	double getamp(double w);
 	void bin(int n);

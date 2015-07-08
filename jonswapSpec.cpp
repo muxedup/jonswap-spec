@@ -40,11 +40,13 @@ jonswapSpec::jonswapSpec(double vel10, double F) {
     alpha = calcAlpha();
     wp = calcWp();
     
-    wmax = 33*wp / 2*M_PI;
+    wmax = 33*wp / (2*M_PI);
     
     gamma = 3.3;
     s1 = 0.7;
     s2 = 0.9;
+	
+	cout << "parameter computation constructor called" << endl;
 }
 
 jonswapSpec::~jonswapSpec() {
@@ -92,14 +94,13 @@ void jonswapSpec::bin(int n) {
         while (bound < wp/4 || bound > wp*4) {
             bound = distribution(gen);
         }
-        cout << "bound found is: " << bound << endl;
+        // cout << "bound found is: " << bound << endl;
         bounds.insert(bound);
         bound = distribution(gen);
     }
     
     for (it = bounds.begin(); it != bounds.end(); ++it) {
         if (it == bounds.begin()) {
-            cout << "begin" << endl;
             wc.push_back(*it/2);
         } /*else if (it == prev(bounds.end())) {
             cout << "end" << endl;
@@ -127,7 +128,7 @@ double jonswapSpec::calcWp() {
     double velxF = vel10*F;
     double g2 = g*g;
     
-    return 22 * pow(g2/velxF, 1.0/3.0);
+    return 22 * cbrt(g2/velxF);
 }
 
 
@@ -145,7 +146,7 @@ vector<double> jonswapSpec::calcPaddleAmps(double dw, double max_stroke) {
             
             total_area += area;
             
-            cout << "area = " << area << endl;
+            //cout << "area = " << area << endl;
             
             area = 0;
             it++;
@@ -159,7 +160,7 @@ vector<double> jonswapSpec::calcPaddleAmps(double dw, double max_stroke) {
     
     total_area += area;
     amps.push_back(area);
-    cout << "area = " << area << endl;
+    //cout << "area = " << area << endl;
     cout << "finished calculating areas..." << endl << "total area is: " << total_area << endl;
     
     for (vector<double>::iterator i = amps.begin(); i != amps.end(); i++) {

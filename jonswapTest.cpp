@@ -27,14 +27,18 @@ int main() {
     vector<double>::iterator it;
     vector<double>::iterator dist_it;
     
-    jonswapSpec jonswap = jonswapSpec(.05);
+    jonswapSpec jonswap = jonswapSpec(.05, 0.5711, 3.0);
+	jonswapSpec jonswap2 = jonswapSpec(15, 2e4);
     
     jonswap.bin(10);
     amps = jonswap.calcPaddleAmps(0.01, 0.75);
     bounds = jonswap.getBins();
     wc = jonswap.getWCs();
     
+	cout << "parametrized jonswap constructor:" << endl;
     cout << jonswap;
+	cout << "computed parameter jonswap constructor:" << endl;
+	cout << jonswap2;
     cout << "\n------------------------------------\n" << endl;
     
     cout << "Bin\t\t\tW_c\t\tAmp" << endl;
