@@ -54,8 +54,6 @@ private:
     vector<double> wc;
     vector<double> amps;
 	
-	default_random_engine gen;
-	
 	double g;
     double calcAlpha();
     double calcWp();

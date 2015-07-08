@@ -30,7 +30,7 @@ int main() {
     jonswapSpec jonswap = jonswapSpec(.05, 0.5711, 3.0);
 	jonswapSpec jonswap2 = jonswapSpec(15, 2e4);
     
-    jonswap.bin(10);
+    jonswap.bin(5);
     amps = jonswap.calcPaddleAmps(0.01, 0.75);
     bounds = jonswap.getBins();
     wc = jonswap.getWCs();

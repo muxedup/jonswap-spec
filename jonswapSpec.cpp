@@ -86,9 +86,13 @@ vector<double> jonswapSpec::getamp(vector<double> w) {
 
 // Randomly generate boundaries for N bins and calculate their center frequency
 void jonswapSpec::bin(int n) {
+	
+	default_random_engine gen;
     normal_distribution<double> distribution(wp, wp/2);
+	
     double bound = distribution(gen);
-    set<double>::iterator it;
+    
+	set<double>::iterator it;
     
     while (bounds.size() < n - 1) {
         while (bound < wp/4 || bound > wp*4) {
