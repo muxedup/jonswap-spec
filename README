@@ -1,0 +1,16 @@
+README
+
+JONSWAP wave spectrum class
+
+Based on the Pierson-Moskowitz spectrum with an extra peak enhancement factor gamma^r. .
+
+S_j (omega) = ag^2/omega^5 * exp[-1.2 * (omega_p/omega)^4] * gamma^r
+
+Where r is defined as:
+
+r = exp[ -(omega - omega_p)^2 / (2*sigma^2*omega_p^2) ]
+
+and sigma is assigned based on the value of omega vs omega_p:
+
+sigma = 0.07 when omega <= omega_p
+	  = 0.09 when omega > omega_p
