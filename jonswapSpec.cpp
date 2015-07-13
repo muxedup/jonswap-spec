@@ -25,7 +25,6 @@ jonswapSpec::jonswapSpec(double alpha, double wp, double wmax, double gamma, dou
     this->s1 = s1;
     this->s2 = s2;
     g = 9.81;
-    cout << "parametrized constructor called" << endl;
 }
 
 // Initializer that calculates alpha and wp based on:
@@ -45,8 +44,6 @@ jonswapSpec::jonswapSpec(double vel10, double F) {
     gamma = 3.3;
     s1 = 0.7;
     s2 = 0.9;
-	
-	cout << "parameter computation constructor called" << endl;
 }
 
 jonswapSpec::~jonswapSpec() {
@@ -56,7 +53,9 @@ jonswapSpec::~jonswapSpec() {
 
 // Calculate amplitude of jonswap spectrum for specific angular velocity
 double jonswapSpec::getamp(double w) {
-    double s = (w > wp ? s2 : s1);
+	
+	// Compute intermediate values:
+    double s = (w > wp ? s2 : s1); // set sigma 
     double dw = w - wp;
     double rexp_denom = s * wp ;
     double rexp = -pow(dw/rexp_denom, 2) / 2.0;
@@ -87,29 +86,26 @@ vector<double> jonswapSpec::getamp(vector<double> w) {
 // Randomly generate boundaries for N bins and calculate their center frequency
 void jonswapSpec::bin(int n) {
 	
-	default_random_engine gen;
+	random_device gen;
     normal_distribution<double> distribution(wp, wp/2);
 	
-    double bound = distribution(gen);
+    double bound = distribution(gen());
     
 	set<double>::iterator it;
     
     while (bounds.size() < n - 1) {
         while (bound < wp/4 || bound > wp*4) {
-            bound = distribution(gen);
+            bound = distribution(gen());
         }
-        // cout << "bound found is: " << bound << endl;
+        
         bounds.insert(bound);
-        bound = distribution(gen);
+        bound = distribution(gen());
     }
     
     for (it = bounds.begin(); it != bounds.end(); ++it) {
         if (it == bounds.begin()) {
             wc.push_back(*it/2);
-        } /*else if (it == prev(bounds.end())) {
-            cout << "end" << endl;
-            wc.push_back((*it + wmax)/2);
-        } */else {
+        } else {
             wc.push_back((*it + *next(it))/2);
         }
     }
@@ -149,9 +145,7 @@ vector<double> jonswapSpec::calcPaddleAmps(double dw, double max_stroke) {
             amps.push_back(area);
             
             total_area += area;
-            
-            //cout << "area = " << area << endl;
-            
+
             area = 0;
             it++;
         }
@@ -164,8 +158,8 @@ vector<double> jonswapSpec::calcPaddleAmps(double dw, double max_stroke) {
     
     total_area += area;
     amps.push_back(area);
-    //cout << "area = " << area << endl;
-    cout << "finished calculating areas..." << endl << "total area is: " << total_area << endl;
+	
+    cout << "finished calculating areas... total area is: " << total_area << endl;
     
     for (vector<double>::iterator i = amps.begin(); i != amps.end(); i++) {
         *i = (*i / total_area) * max_stroke; // Compute the power or energy here???
@@ -185,10 +179,12 @@ ostream &operator<<(ostream &output, const jonswapSpec & jonswap) {
         output << "vel10\t: " << jonswap.vel10 << endl
             << "F\t: " << jonswap.F << endl;
     }
+    if (jonswap.amps.size()) {
+	    output << "Nbins\t: " << jonswap.bounds.size() + 1 << endl;
+	    output << "Amps\t: [ 1 x " << jonswap.amps.size() << " ]\n";
+	    output << "W_c\t: [ 1 x " << jonswap.wc.size() << " ]\n";
+    }
     
-    output << "Nbins\t: " << jonswap.bounds.size() + 1 << endl;
-    output << "Amps\t: [ 1 x " << jonswap.amps.size() << " ]\n";
-    output << "W_c\t: [ 1 x " << jonswap.wc.size() << " ]\n";
     return output;
 }
 
