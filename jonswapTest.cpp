@@ -16,7 +16,7 @@ using std::ofstream;
 using std::cout;
 using std::endl;
 
-int main() {
+int main(int argc, char *argv[]) {
     
     vector<double> w;
     vector<double> dist;
@@ -26,11 +26,16 @@ int main() {
     set<double>::iterator bounds_it;
     vector<double>::iterator it;
     vector<double>::iterator dist_it;
+	int nbins = 10;
     
+	if(argc > 1) {
+		nbins = atoi(argv[1]);
+	}
+	
     jonswapSpec jonswap = jonswapSpec(.05, 0.5711, 3.0);
 	jonswapSpec jonswap2 = jonswapSpec(15, 2e4);
     
-    jonswap.bin(5);
+    jonswap.bin(nbins);
     amps = jonswap.calcPaddleAmps(0.01, 0.75);
     bounds = jonswap.getBins();
     wc = jonswap.getWCs();
