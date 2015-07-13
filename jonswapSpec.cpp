@@ -89,17 +89,17 @@ void jonswapSpec::bin(int n) {
 	random_device gen;
     normal_distribution<double> distribution(wp, wp/2);
 	
-    double bound = distribution(gen());
+    double bound = distribution(gen);
     
 	set<double>::iterator it;
     
     while (bounds.size() < n - 1) {
         while (bound < wp/4 || bound > wp*4) {
-            bound = distribution(gen());
+            bound = distribution(gen);
         }
         
         bounds.insert(bound);
-        bound = distribution(gen());
+        bound = distribution(gen);
     }
     
     for (it = bounds.begin(); it != bounds.end(); ++it) {
@@ -109,7 +109,8 @@ void jonswapSpec::bin(int n) {
             wc.push_back((*it + *next(it))/2);
         }
     }
-    wc.push_back((*bounds.end() + wmax)/2);
+	
+    wc.push_back((*prev(bounds.end()) + wmax)/2);
 }
 
 // Calculate alpha based on wind speed and fetch
