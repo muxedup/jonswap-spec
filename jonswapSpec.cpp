@@ -96,23 +96,16 @@ void jonswapSpec::bin(int n) {
     double bound = distribution(gen);
 #else
 	srand(time(NULL));
-	double bound = rand();
-	double range = wp*2 - wp/2;
-	double offset = wp/2;
+	double bound;
+	double range = 0.05 * (wmax / n); // range is +- 2.5% of bin width 
+	double offset = -wmax / (2*n); // center range around 0
 #endif
 	
 	set<double>::iterator it;
     
-    while (bounds.size() < n - 1) {
-#if USE_CPP11
-		while (bound < wp/4 || bound > wp*4) {
-			bound = distribution(gen);
-        }
-        bounds.insert(bound);
-        bound = distribution(gen);
-#else
-		bound = ((double) rand() / RAND_MAX) * range + offset;
-#endif
+    for (int i = 1; i < n; i++) {
+		bound = i * wmax/n + ((double) rand() / RAND_MAX) * range + offset;
+		bounds.insert(bound);
     }
     
     for (it = bounds.begin(); it != bounds.end(); ++it) {
