@@ -1,21 +1,26 @@
 #ifndef JONSWAPSPEC_H
 #define JONSWAPSPEC_H 
 
+#define USE_CPP11 0
+
 #include <vector>
 #include <set>
 #include <iterator>
 #include <iostream>
 #include <random>
 #include <cmath>
+#include <time.h>
 
 using std::ostream;
 using std::cout;
 using std::endl;
 using std::vector;
 using std::set;
+
+#if USE_CPP11
 using std::random_device;
 using std::normal_distribution;
-
+#endif
 
 class jonswapSpec
 {

@@ -24,6 +24,10 @@ jonswapSpec::jonswapSpec(double alpha, double wp, double wmax, double gamma, dou
     this->gamma = gamma;
     this->s1 = s1;
     this->s2 = s2;
+	
+	this->F = 0.0;
+	this->vel10 = 0.0;
+	
     g = 9.81;
 }
 
@@ -86,20 +90,29 @@ vector<double> jonswapSpec::getamp(vector<double> w) {
 // Randomly generate boundaries for N bins and calculate their center frequency
 void jonswapSpec::bin(int n) {
 	
+#if USE_CPP11
 	random_device gen;
     normal_distribution<double> distribution(wp, wp/2);
-	
     double bound = distribution(gen);
-    
+#else
+	srand(time(NULL));
+	double bound = rand();
+	double range = wp*2 - wp/2;
+	double offset = wp/2;
+#endif
+	
 	set<double>::iterator it;
     
     while (bounds.size() < n - 1) {
-        while (bound < wp/4 || bound > wp*4) {
-            bound = distribution(gen);
+#if USE_CPP11
+		while (bound < wp/4 || bound > wp*4) {
+			bound = distribution(gen);
         }
-        
         bounds.insert(bound);
         bound = distribution(gen);
+#else
+		bound = ((double) rand() / RAND_MAX) * range + offset;
+#endif
     }
     
     for (it = bounds.begin(); it != bounds.end(); ++it) {
