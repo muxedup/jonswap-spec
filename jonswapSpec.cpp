@@ -97,9 +97,11 @@ void jonswapSpec::bin(int n) {
 #else
 	srand(time(NULL));
 	double bound;
-	double range = 0.05 * (wmax / n); // range is +- 2.5% of bin width 
+	double range = 0.4 * (wmax / n); // range is +- 2.5% of bin width 
 	double offset = -wmax / (2*n); // center range around 0
 #endif
+	
+	//cout << "range is " << range << endl;
 	
 	set<double>::iterator it;
     
