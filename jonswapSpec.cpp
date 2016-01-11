@@ -4,9 +4,21 @@
 //
 //  Created by Munan Xu on 6/30/15.
 //
+//   S_j (omega) = alpha g^2/omega^5 * exp[-1.2 * (omega_p/omega)^4] * gamma^r
+//
+//  where r is defined as:
+//
+//  r = exp[ -(omega - omega_p)^2 / (2*sigma^2*omega_p^2) ]
+//
+//  Need U_10 (10 m wind speed) and F (fetch) to determine
+//     alpha = 0.076 (U_10^2/(F g))^.22
+//   omega_p = 22 (g*g/(U_10*F)^(1/3), peak frequency
+//     gamma = 3.3
+//     sigma = (0.07 for omega<omega_p; 0.09 for omega>omega_p)
 //
 
 #include <stdio.h>
+#include <math.h>
 #include "jonswapSpec.h"
 
 
@@ -80,7 +92,7 @@ vector<double> jonswapSpec::getamp(vector<double> w) {
     vector<double>::iterator it;
     double amp;
     
-    for ( it = w.begin(); it != w.end(); ++it) {
+    for ( it = w.begin()+1; it != w.end(); ++it) {      //RAD: +1
         amp = getamp(*it);
         amps.push_back(amp);
     }
@@ -104,9 +116,10 @@ void jonswapSpec::bin(int n) {
 	//cout << "range is " << range << endl;
 	
 	set<double>::iterator it;
-    
-    for (int i = 1; i < n; i++) {
+    cout<<"Bounds: " <<endl;
+    for (int i = 1; i < n+1; i++) {
 		bound = i * wmax/n + ((double) rand() / RAND_MAX) * range + offset;
+		cout <<bound <<endl;
 		bounds.insert(bound);
     }
     
@@ -141,40 +154,81 @@ double jonswapSpec::calcWp() {
 }
 
 
-// Integrate and normalize jonswap spectrum using discrete trapezoidal integration
-// dw - specify the integration step size
-// max_stroke - maximum horizontal stroke at free surface
-vector<double> jonswapSpec::calcPaddleAmps(double dw, double max_stroke) {
-    set<double>::iterator it = bounds.begin();
-    double area = 0;
-    double total_area = 0;
-    
-    for (double i = dw; i < wmax; i += dw) {
-        if (i >= *it && it != bounds.end()) {
-            amps.push_back(area);
-            
-            total_area += area;
+// Integrate jonswap spectrum using discrete trapezoidal integration to find amp of bin
 
-            area = 0;
-            it++;
-        }
-        
-        double b1 = getamp(i);
-        double b2 = getamp(i + dw);
-        area += dw*(b1 + b2)/2;
-        
-    }
+
+
+  	vector <double> jonswapSpec::calcBinAmps (int n, int nmems)   {
+  	
+  	set<double>::iterator it = bounds.begin();
+
+  	double dw; 
+    double w;
+    double area = 0.0;
+    double total_area = 0;
+    cout <<"bounds.begin: " << *it <<endl;
+    cout <<"length of bounds: "<< bounds.size()<<endl;
+    cout <<"last boundary: " <<*(bounds.end()--)<<endl;
     
+    
+    for (int ic = 1; ic < n; ic ++) {  //for each interval
+        double binWidth=( *next(it) -*it);
+        dw = binWidth/(nmems);  //increment
+        double wi = *it;
+        area=0.0;
+        // integrate interval using nmems divisions
+        for (int in = 0; in< nmems; in++) {
+          w = wi+in*dw;         //frequencies in bin
+          double b1 = getamp(w);
+          double b2 = getamp(w + dw);
+          area += dw*(b1 + b2)/2.;      
+          } 
     total_area += area;
-    amps.push_back(area);
-	
-    cout << "finished calculating areas... total area is: " << total_area << endl;
-    
-    for (vector<double>::iterator i = amps.begin(); i != amps.end(); i++) {
-        *i = (*i / total_area) * max_stroke; // Compute the power or energy here???
-    }
-    return amps;
+    amps.push_back(area/binWidth);
+    cout<< "freq " << wi <<", amp " << area/binWidth <<endl;
+  	it++;  	  
+  	}
+  cout << "finished calculating areas... total area is: " << total_area << endl;
+  return amps;
+
 }
+
+
+
+// calculate actual paddle stokes as a function of center frequency using linear wave theory
+   vector<double> jonswapSpec::calcPaddleAmps(double h) {
+ 
+    vector<double>::iterator iamps = amps.begin();
+    vector<double>::iterator wc_it;
+    bool piston = false;
+    double HoS;
+     
+    for (wc_it = wc.begin(); wc_it !=wc.end(); ++wc_it) {
+        double binWidth = (*next(wc_it) -*wc_it);
+        double k0 = (*wc_it)*(*wc_it)/9.81;   //k0= wc^2/g
+        double kh = k0*h*pow(1.0-exp(-(pow(k0*h, 1.25))),-.4);
+        cout <<"wc  "<< *wc_it << ", k0 " << k0 <<", kh " <<kh;
+        double tempAmp=sqrt(*iamps*binWidth*2);
+        if ( piston ) {
+             HoS= 2*(cosh(2*kh)-1)/(sinh(2*kh) + 2*kh);
+             cout<< ", Piston Wavemaker" <<endl; }
+           else {
+             HoS= 4*(sinh(kh)/kh)*(kh*sinh(kh)-cosh(kh)+1)/(sinh(2*kh)+2*kh);
+              cout<< ", Flap Wavemaker" ; }       
+        tempAmp = tempAmp/HoS;
+        cout <<", PaddleAmp " << tempAmp <<endl;
+        paddleAmps.push_back(tempAmp/HoS);
+ //       cout <<*iamps<<", " << binWidth<<", "<< sqrt(*iamps*binWidth*2)<<endl;
+      iamps++;
+     }
+       
+        
+ //   for (vector<double>::iterator i = amps.begin(); i != amps.end(); i++) {
+ //       *i = (*i / total_area) * max_stroke; // Compute the power or energy here???
+//    }
+    return paddleAmps;
+}
+ 
 
 ostream &operator<<(ostream &output, const jonswapSpec & jonswap) {
     output << "jonswapSpec params:" << endl

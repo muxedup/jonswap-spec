@@ -34,13 +34,17 @@ public:
     
     set<double> getBins() { return bounds; }
     
+    vector<double> calcBinAmps(int n, int integ_interval);
+    
+  //  set<double> getAmps() { return amps; }
+    
     vector<double> getWCs(){ return wc; }
     
     double getWmax() { return wmax; }
     
     vector<double> getamp(vector<double> w);
     
-    vector<double> calcPaddleAmps(double dw, double max_stroke);
+    vector<double> calcPaddleAmps(double h);
     
 	
 	virtual ~jonswapSpec ();
@@ -51,6 +55,7 @@ private:
     set<double> bounds;
     vector<double> wc;
     vector<double> amps;
+    vector<double> paddleAmps;
 	
 	double g;
     double calcAlpha();
