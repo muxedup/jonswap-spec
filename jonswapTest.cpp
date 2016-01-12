@@ -31,7 +31,7 @@ int main(int argc, char *argv[]) {
     vector<double>::iterator dist_it;
     vector<double> paddleAmps;
     double max_freq;
-    
+    int count = 0;
 	int nbins = 10;
 //  nbins can be changed during execution: for example, 'jonswap 20'  
 	if(argc > 1) {
@@ -58,7 +58,7 @@ int main(int argc, char *argv[]) {
 //	cout << jonswap2;
     cout << "\n------------------------------------\n" << endl;
     
-    cout << "Bin\t\t\tW_c\t\tAmp" << endl;
+    cout << "#\tBin\t\t\tW_c\t\tAmp" << endl;
     // print out sampled spectrum
     amps_it = amps.begin();
     wc_it = wc.begin();
@@ -66,7 +66,8 @@ int main(int argc, char *argv[]) {
     ofstream data0;
     data0.open("jonswap_sample.txt",std::ofstream::out|ofstream::trunc);
     
-    for (bounds_it = bounds.begin(); bounds_it != bounds.end(); ++bounds_it) {
+    for (bounds_it = bounds.begin(); bounds_it != prev(bounds.end()); ++bounds_it) {
+		cout << count << "\t";
         if (bounds_it == bounds.begin()) {
             cout << "0 - " << *bounds_it << "\t\t: " << *wc_it << "\t" << *amps_it << endl;
             data0 << *wc_it <<"\t"<<*amps_it <<endl;
@@ -77,9 +78,10 @@ int main(int argc, char *argv[]) {
         
         wc_it++;
         amps_it++;
+		count++;
     }
     
-    
+    cout << count << "\t";
     cout << *prev(bounds.end()) << " - " << jonswap.getWmax() << "\t\t: " << *wc_it << "\t" << *amps_it << endl;
     data0 << *wc_it <<"\t"<<*amps_it <<endl;
     data0.close();

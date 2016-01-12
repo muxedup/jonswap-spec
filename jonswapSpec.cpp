@@ -19,6 +19,7 @@
 
 #include <stdio.h>
 #include <math.h>
+#include <float.h>
 #include "jonswapSpec.h"
 
 
@@ -123,15 +124,20 @@ void jonswapSpec::bin(int n) {
 		bounds.insert(bound);
     }
     
-    for (it = bounds.begin(); it != bounds.end(); ++it) {
+    for (it = bounds.begin(); it != prev(bounds.end()); ++it) {
         if (it == bounds.begin()) {
+			cout << "bounds: 0 - " << *it;
             wc.push_back(*it/2);
+			cout << ":\twc = " << *it/2 << endl;
         } else {
+			cout << "bounds: " << *it << " - " << *next(it);
             wc.push_back((*it + *next(it))/2);
+			cout << ":\twc = " << (*it + *next(it))/2 << endl;
         }
     }
-	
+	cout << "bounds: " << *prev(bounds.end()) << " - " << wmax;
     wc.push_back((*prev(bounds.end()) + wmax)/2);
+	cout << ":\twc = " << (*prev(bounds.end()) + wmax)/2 << endl;
 }
 
 // Calculate alpha based on wind speed and fetch
@@ -155,10 +161,7 @@ double jonswapSpec::calcWp() {
 
 
 // Integrate jonswap spectrum using discrete trapezoidal integration to find amp of bin
-
-
-
-  	vector <double> jonswapSpec::calcBinAmps (int n, int nmems)   {
+vector <double> jonswapSpec::calcBinAmps (int n, int nmems)   {
   	
   	set<double>::iterator it = bounds.begin();
 
@@ -168,26 +171,39 @@ double jonswapSpec::calcWp() {
     double total_area = 0;
     cout <<"bounds.begin: " << *it <<endl;
     cout <<"length of bounds: "<< bounds.size()<<endl;
-    cout <<"last boundary: " <<*(bounds.end()--)<<endl;
+    cout <<"last boundary: " <<*(prev(bounds.end()))<<endl;
+    double binWidth;
     
-    
-    for (int ic = 1; ic < n; ic ++) {  //for each interval
-        double binWidth=( *next(it) -*it);
+    for (auto ic = it; ic != bounds.end(); ++ic) {  //for each interval
+        
+		if(ic != prev(bounds.end())) {
+			binWidth = *next(ic) - *ic;
+		} else if (ic == bounds.begin()) {
+			binWidth = *ic;
+		} else {
+			binWidth = wmax - *ic;
+		}
+		cout << "binwidth: " << binWidth << endl;
         dw = binWidth/(nmems);  //increment
-        double wi = *it;
+        double wi;
+		if (ic == bounds.begin()) 
+			wi = DBL_EPSILON; // we need a small nonzero value
+		else
+			wi = *ic;
         area=0.0;
         // integrate interval using nmems divisions
         for (int in = 0; in< nmems; in++) {
-          w = wi+in*dw;         //frequencies in bin
-          double b1 = getamp(w);
-          double b2 = getamp(w + dw);
-          area += dw*(b1 + b2)/2.;      
-          } 
-    total_area += area;
-    amps.push_back(area/binWidth);
-    cout<< "freq " << wi <<", amp " << area/binWidth <<endl;
-  	it++;  	  
-  	}
+        	w = wi+in*dw;         //frequencies in bin
+        	double b1 = getamp(w);
+        	double b2 = getamp(w + dw);
+        	area += dw*(b1 + b2)/2.;      
+        }
+		
+    	total_area += area;
+    	amps.push_back(area/binWidth);
+		
+    	cout<< "freq " << wi <<", amp " << area/binWidth <<endl; 
+  }
   cout << "finished calculating areas... total area is: " << total_area << endl;
   return amps;
 
@@ -200,11 +216,20 @@ double jonswapSpec::calcWp() {
  
     vector<double>::iterator iamps = amps.begin();
     vector<double>::iterator wc_it;
+	set<double>::iterator bounds_it = bounds.begin();
     bool piston = false;
     double HoS;
-     
+    double binWidth;
+	
     for (wc_it = wc.begin(); wc_it !=wc.end(); ++wc_it) {
-        double binWidth = (*next(wc_it) -*wc_it);
+		if (next(bounds_it) == bounds.end()) {
+			binWidth = wmax - *bounds_it;
+		} else if (bounds_it == bounds.begin()) {
+			binWidth = *bounds_it;
+		} else {
+			binWidth = (*next(bounds_it) -*bounds_it);
+		}
+        
         double k0 = (*wc_it)*(*wc_it)/9.81;   //k0= wc^2/g
         double kh = k0*h*pow(1.0-exp(-(pow(k0*h, 1.25))),-.4);
         cout <<"wc  "<< *wc_it << ", k0 " << k0 <<", kh " <<kh;
@@ -218,8 +243,10 @@ double jonswapSpec::calcWp() {
         tempAmp = tempAmp/HoS;
         cout <<", PaddleAmp " << tempAmp <<endl;
         paddleAmps.push_back(tempAmp/HoS);
+		
+		bounds_it++;
  //       cout <<*iamps<<", " << binWidth<<", "<< sqrt(*iamps*binWidth*2)<<endl;
-      iamps++;
+      	iamps++;
      }
        
         
