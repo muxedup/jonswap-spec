@@ -34,7 +34,7 @@ public:
     
     set<double> getBins() { return bounds; }
     
-    vector<double> calcBinAmps(int n, int integ_interval);
+    vector<double> calcBinAmps(int integ_interval);
     
   //  set<double> getAmps() { return amps; }
     

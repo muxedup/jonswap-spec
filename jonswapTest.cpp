@@ -49,7 +49,7 @@ int main(int argc, char *argv[]) {
     bounds = jonswap.getBins();  // returns bin bounds
     wc = jonswap.getWCs(); //wc  bin center angular frequencies (method defined in .h file)
     cout <<"size of wc: " <<wc.size()<<endl;
-    amps = jonswap.calcBinAmps(nbins, 20);  // calculate the bin average amplitude
+    amps = jonswap.calcBinAmps(20);  // calculate the bin average amplitude
     double depth = 0.4;
     paddleAmps = jonswap.calcPaddleAmps(depth);
 	cout << "parametrized jonswap constructor:" << endl;

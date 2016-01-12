@@ -161,52 +161,44 @@ double jonswapSpec::calcWp() {
 
 
 // Integrate jonswap spectrum using discrete trapezoidal integration to find amp of bin
-vector <double> jonswapSpec::calcBinAmps (int n, int nmems)   {
-  	
-  	set<double>::iterator it = bounds.begin();
-
-  	double dw; 
-    double w;
-    double area = 0.0;
-    double total_area = 0;
-    cout <<"bounds.begin: " << *it <<endl;
-    cout <<"length of bounds: "<< bounds.size()<<endl;
-    cout <<"last boundary: " <<*(prev(bounds.end()))<<endl;
-    double binWidth;
-    
-    for (auto ic = it; ic != bounds.end(); ++ic) {  //for each interval
-        
-		if(ic != prev(bounds.end())) {
-			binWidth = *next(ic) - *ic;
-		} else if (ic == bounds.begin()) {
-			binWidth = *ic;
+vector <double> jonswapSpec::calcBinAmps (int nmems)   {
+	//set<double>::iterator bounds_it = bounds.begin();
+	double binWidth;
+	double binArea, area;
+	
+	double startx, dx;
+	double sidea, sideb, slice_area;
+	
+	area = 0;
+	
+	for (auto bounds_it = bounds.begin(); bounds_it != bounds.end(); ++bounds_it) {
+		binArea = 0;
+		
+		if(bounds_it == bounds.begin()) {
+			binWidth = *bounds_it;
+			dx = binWidth/(nmems+1); // start at dx instead of 0 so we need an extra step
+			startx = dx;
+		} else if (bounds_it == prev(bounds.end())) {
+			startx = *bounds_it;
+			binWidth = wmax - startx;
+			dx = binWidth/nmems;
 		} else {
-			binWidth = wmax - *ic;
+			startx = *bounds_it;
+			binWidth = *next(bounds_it) - startx;
+			dx = binWidth/nmems;
 		}
-		cout << "binwidth: " << binWidth << endl;
-        dw = binWidth/(nmems);  //increment
-        double wi;
-		if (ic == bounds.begin()) 
-			wi = DBL_EPSILON; // we need a small nonzero value
-		else
-			wi = *ic;
-        area=0.0;
-        // integrate interval using nmems divisions
-        for (int in = 0; in< nmems; in++) {
-        	w = wi+in*dw;         //frequencies in bin
-        	double b1 = getamp(w);
-        	double b2 = getamp(w + dw);
-        	area += dw*(b1 + b2)/2.;      
-        }
 		
-    	total_area += area;
-    	amps.push_back(area/binWidth);
-		
-    	cout<< "freq " << wi <<", amp " << area/binWidth <<endl; 
-  }
-  cout << "finished calculating areas... total area is: " << total_area << endl;
-  return amps;
-
+		for(double i = startx; i < startx+binWidth; i += dx) {
+			sidea = this->getamp(i);
+			sideb = this->getamp(i + dx);
+			
+			slice_area = dx*(sidea + sideb)/2;
+			binArea += slice_area;
+		}
+		amps.push_back(binArea);
+		area += binArea;
+	}
+	return amps;
 }
 
 
