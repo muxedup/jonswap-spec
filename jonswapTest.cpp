@@ -66,7 +66,7 @@ int main(int argc, char *argv[]) {
     ofstream data0;
     data0.open("jonswap_sample.txt",std::ofstream::out|ofstream::trunc);
     
-    for (bounds_it = bounds.begin(); bounds_it != prev(bounds.end()); ++bounds_it) {
+    for (bounds_it = bounds.begin(); bounds_it != bounds.end(); ++bounds_it) {
 		cout << count << "\t";
         if (bounds_it == bounds.begin()) {
             cout << "0 - " << *bounds_it << "\t\t: " << *wc_it << "\t" << *amps_it << endl;

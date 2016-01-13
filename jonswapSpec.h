@@ -1,7 +1,7 @@
 #ifndef JONSWAPSPEC_H
 #define JONSWAPSPEC_H 
 
-#define USE_CPP11 0
+#define USE_CPP11 1
 
 #include <vector>
 #include <set>
