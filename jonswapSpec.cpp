@@ -236,10 +236,11 @@ vector <double> jonswapSpec::calcBinAmps (int nmems)   {
 			slice_area = dx*(sidea + sideb)/2;
 			binArea += slice_area;
 		}
-		amps.push_back(binArea);
-		area += binArea;
-		cout << "\tbinArea = " << binArea << endl;
+		amps.push_back(binArea/binWidth);
+		area += binArea/binWidth;
+		cout << "\tbinArea = " << binArea/binWidth << endl;
 	}
+	cout << "finished calculating areas... total area is: " << area << endl;
 	return amps;
 }
 
