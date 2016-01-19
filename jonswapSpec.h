@@ -1,13 +1,13 @@
 #ifndef JONSWAPSPEC_H
 #define JONSWAPSPEC_H 
 
-#define USE_CPP11 1
+#define USE_CPP11 0
 
 #include <vector>
 #include <set>
 #include <iterator>
 #include <iostream>
-#include <random>
+
 #include <cmath>
 #include <time.h>
 
@@ -18,8 +18,18 @@ using std::vector;
 using std::set;
 
 #if USE_CPP11
+#include <random>
 using std::random_device;
 using std::normal_distribution;
+#else
+template<class InputIterator> InputIterator next(InputIterator it) {
+	InputIterator tmp = it;
+	return ++tmp;
+}
+template<class InputIterator> InputIterator prev(InputIterator it) {
+	InputIterator tmp = it;
+	return --tmp;
+}
 #endif
 
 class jonswapSpec
