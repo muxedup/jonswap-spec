@@ -7,7 +7,7 @@
 #include <set>
 #include <iterator>
 #include <iostream>
-
+#include <stdlib.h>
 #include <cmath>
 #include <time.h>
 
